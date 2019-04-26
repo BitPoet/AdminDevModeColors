@@ -1,0 +1,166 @@
+<?php
+
+/**
+ * Admin Dev Mode Colors
+ *
+ * ProcessWire CMS module
+ *
+ * Changes the top bar color and injects a configurable string next to / instead of
+ * the PW logo on development machines.
+ *
+ * The colors and text can be set in the module's configuration.
+ *
+ * You can enable development mode in two ways:
+ *	- in the module's configuration
+ *	- by setting $config->devMode to a truthy value in site/config.php
+ *
+ * Currently supported admin themes:
+ *	- AdminThemeDefault
+ *	- AdminThemeReno
+ *	- AdminThemeUikit
+ *
+ * This module is released under the MIT license
+ *
+ * The module includes the touch ready color picker from
+ * https://github.com/tovic/color-picker licences under the same
+ * terms
+ *
+ **/
+
+class AdminDevModeColors extends WireData implements Module, ConfigurableModule {
+	
+	public static function getModuleInfo() {
+		return [
+			"title"		=>	"Admin DEV Mode Colors",
+			"summary"	=>	"Enable distinct color scheme for development installs of PW",
+			"version"	=>	"0.0.1",
+			"autoload"	=>	true
+		];
+	}
+	
+	public function init() {
+		$this->addHookAfter("AdminTheme::getExtraMarkup", $this, "getColorMarkup");
+		$this->wire('modules')->loadModuleFileAssets($this);
+		$this->config->styles->add($this->getUrlFor("color-picker", "css"));
+		$this->config->scripts->add($this->getUrlFor("color-picker", "js"));
+	}
+	
+	protected function getUrlFor($name, $ext) {
+		$min = $this->config->debug ? "" : ".min";
+		$fn = $name . $min. "." . $ext;
+		$path = $this->config->paths->{$this->className()} . $fn;
+		if(! file_exists($path)) return;
+		$ts = strftime("%Y%m%d%H%M%S", filemtime($path));
+		$url = $this->config->urls->{$this->className()} . $fn . "?" . $ts;
+		return $url;
+	}
+	
+	public function getColorMarkup(HookEvent $event) {
+		$parts = $event->return;
+		
+		if($this->config->devMode || $this->devMode) {
+			$parts["head"] .= $this->getStyle();
+		}
+		
+		$event->return = $parts;
+	}
+	
+	protected function getStyle() {
+		$bgcolor = $this->bgColor;
+		if(! $bgcolor) $bgcolor = 'rgb(153, 12, 94)';
+		$fgcolor = $this->fgColor;
+		if(! $fgcolor) $fgcolor = 'rgb(255, 255, 255)';
+		$devstring = $this->devString;
+		if(! $devstring) $devstring = "DEV";
+
+		$style = "<style>
+		/* Top bar coloring */
+		#masthead, #branding, #pw-masthead, #pw-masthead-mobile, body.AdminThemeReno a.main-nav-toggle { background-color: $bgcolor !important; }
+		body.AdminThemeReno #masthead #topnav > li > a { color: rgb(201, 207, 222) !imoprtant; }
+		
+		/* Admin theme default */
+		body.AdminThemeDefault #logo:before,
+		body.AdminThemeDefault li.collapse-topnav-menu:after {
+			content: '$devstring';
+			color: $fgcolor;
+			font-size: 2em;
+			font-weight: bold;
+			vertical-align: top;
+			margin-right: 1em;
+		}
+		body.AdminThemeDefault #logo img {
+			display: none;
+		}
+		
+		/* Admin theme Reno */
+		body.AdminThemeReno #logo:after {
+			content: '$devstring';
+			color: $fgcolor;
+			vertical-align: middle;
+			font-size: 2em !important;
+			letter-spacing: 0.05em;
+			margin-right: 5em;
+		}
+		body.AdminThemeReno #branding #logo img { display: none; }
+		body.AdminThemeReno #branding #logo img.sm {
+			display: inline;
+			margin: 0;
+		}
+		body.AdminThemeReno #branding #logo {
+			margin-top: 0.2em;
+		}
+		
+		/* Admin theme Uikit */
+		div.uk-navbar-right > ul > li:first-child > a:before,
+		#pw-masthead-mobile a:after {
+			content: '$devstring';
+			margin-right: 5em;
+			font-size: 2em;
+			font-weight: bold;
+			color: $fgcolor;
+			vertical-align: middle;
+		}
+		</style>" . PHP_EOL;
+	
+		return $style;
+	}
+	
+	public static function getModuleConfigInputfields($data) {
+		$inputfields = new InputfieldWrapper();
+		
+		$f = wire('modules')->get('InputfieldCheckbox');
+		$f->attr('id+name', 'devMode');
+		$f->attr('value', 1);
+		if(isset($data["devMode"]) && $data["devMode"]) $f->attr('checked', 'checked');
+		$f->label = wire()->_("Enable DEV mode");
+		$f->description = wire()->_("Check this box to enable DEV mode colors");
+		$f->notice = wire()->_('You can also set $config->devMode = true in site/ready.php instead');
+		$inputfields->append($f);
+		
+		$f = wire('modules')->get('InputfieldText');
+		$f->attr('id+name', 'bgColor');
+		$f->attr('value', isset($data["bgColor"]) ? $data["bgColor"] : 'rgb(153, 12, 94)');
+		$f->addClass('colorpicker');
+		$f->label = wire()->_("Background Color");
+		$f->description = wire()->_("Background color for masthead (top bar)");
+		$inputfields->append($f);
+		
+		$f = wire('modules')->get('InputfieldText');
+		$f->attr('id+name', 'fgColor');
+		$f->attr('value', isset($data["fgColor"]) ? $data["fgColor"] : 'rgb(255, 255, 255)');
+		$f->addClass('colorpicker');
+		$f->label = wire()->_("Foreground Color");
+		$f->description = wire()->_("Foreground color for dev text (top bar)");
+		$inputfields->append($f);
+		
+		$f = wire('modules')->get('InputfieldText');
+		$f->attr('id+name', 'devString');
+		$f->attr('value', isset($data["devString"]) ? $data["devString"] : 'DEV');
+		$f->label = wire()->_("Inject Text");
+		$f->description = wire()->_("Text to inject into the top bar to distinguish this as a dev system");
+		$inputfields->append($f);
+		
+		return $inputfields;
+	}
+	
+}
