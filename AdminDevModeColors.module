@@ -67,10 +67,15 @@ class AdminDevModeColors extends WireData implements Module, ConfigurableModule 
 	
 	protected function getStyle() {
 		$bgcolor = $this->bgColor;
+		if(!empty($this->config->devModeBgColor)) $bgcolor = $this->config->devModeBgColor;
 		if(! $bgcolor) $bgcolor = 'rgb(153, 12, 94)';
+		
 		$fgcolor = $this->fgColor;
+		if(!empty($this->config->devModeFgColor)) $fgcolor = $this->config->devModeFgColor;
 		if(! $fgcolor) $fgcolor = 'rgb(255, 255, 255)';
+		
 		$devstring = $this->devString;
+		if(!empty($this->config->devModeDevString)) $devstring = $this->config->devModeDevString;
 		if(! $devstring) $devstring = "DEV";
 
 		$style = "<style>
