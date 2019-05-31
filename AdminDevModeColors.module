@@ -33,7 +33,7 @@ class AdminDevModeColors extends WireData implements Module, ConfigurableModule 
 		return [
 			"title"		=>	"Admin DEV Mode Colors",
 			"summary"	=>	"Enable distinct color scheme for development installs of PW",
-			"version"	=>	"0.0.1",
+			"version"	=>	"0.0.2",
 			"autoload"	=>	true
 		];
 	}
