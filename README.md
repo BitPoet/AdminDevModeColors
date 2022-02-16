@@ -20,6 +20,21 @@ I suggest to use the site/config.php option since this file usually needs to be 
 and you are less likely to accidentally ship your changes to the production system this way, unlike the module
 settings option.
 
+### Change color settings and text
+
+The colors used for the background of the menu bar, the textual indicator and its foreground color can be set in
+the module's configuration.
+
+### Override settings in config.php
+
+You can override any settings for background, foreground and dev string present in the module configuration with
+entries in config.php.
+
+The properties are:
+- ```$config->devModeBgColor```
+- ```$config->devModeFgColor```
+- ```$config->devModeDevString```
+
 ## Admin Theme Support
 The module supports the following admin themes:
 - Default

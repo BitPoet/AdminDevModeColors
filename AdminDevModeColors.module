@@ -33,7 +33,7 @@ class AdminDevModeColors extends WireData implements Module, ConfigurableModule 
 		return [
 			"title"		=>	"Admin DEV Mode Colors",
 			"summary"	=>	"Enable distinct color scheme for development installs of PW",
-			"version"	=>	"0.0.1",
+			"version"	=>	"0.0.3",
 			"autoload"	=>	true
 		];
 	}
@@ -50,7 +50,7 @@ class AdminDevModeColors extends WireData implements Module, ConfigurableModule 
 		$fn = $name . $min. "." . $ext;
 		$path = $this->config->paths->{$this->className()} . $fn;
 		if(! file_exists($path)) return;
-		$ts = strftime("%Y%m%d%H%M%S", filemtime($path));
+		$ts = date('YmdHis', filemtime($path));
 		$url = $this->config->urls->{$this->className()} . $fn . "?" . $ts;
 		return $url;
 	}
@@ -67,10 +67,15 @@ class AdminDevModeColors extends WireData implements Module, ConfigurableModule 
 	
 	protected function getStyle() {
 		$bgcolor = $this->bgColor;
+		if(!empty($this->config->devModeBgColor)) $bgcolor = $this->config->devModeBgColor;
 		if(! $bgcolor) $bgcolor = 'rgb(153, 12, 94)';
+		
 		$fgcolor = $this->fgColor;
+		if(!empty($this->config->devModeFgColor)) $fgcolor = $this->config->devModeFgColor;
 		if(! $fgcolor) $fgcolor = 'rgb(255, 255, 255)';
+		
 		$devstring = $this->devString;
+		if(!empty($this->config->devModeDevString)) $devstring = $this->config->devModeDevString;
 		if(! $devstring) $devstring = "DEV";
 
 		$style = "<style>
