@@ -2,7 +2,7 @@
 Distinguish the backend for ProcessWire development instances with different colors
 
 ## Status
-alpha
+beta
 
 ## Compatibility
 This module is compatible with ProcessWire 3.0
